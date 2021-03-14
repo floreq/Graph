@@ -49,6 +49,60 @@ namespace GraphModel
             }
             return sum;
         }
+        public HashSet<Vertice> GetNeighbors(Vertice v)
+        {
+            var neighbors = new HashSet<Vertice>();
+            foreach (var e in E)
+            {
+                if (e.I == v) neighbors.Add(e.J);
+                else if (e.J == v) neighbors.Add(e.I);
+            }
+            return neighbors;
+        }
+        public void Mutation()
+        {
+            var randomEdge = GetRandomEdge();
+            E.Remove(randomEdge);
+
+            var neighborsVerticeI = GetNeighbors(randomEdge.I);
+            var neighborsVerticeJ = GetNeighbors(randomEdge.J);
+
+            if (neighborsVerticeI.Count() == 0)
+            {
+                CreateRandomEdge(randomEdge.I, V);
+                return;
+            }
+            else if (neighborsVerticeJ.Count() == 0)
+            {
+                CreateRandomEdge(randomEdge.J, V);
+                return;
+            }
+
+            var allNeighbors = new List<Vertice>(neighborsVerticeJ);
+
+            for (int i = 0; i < allNeighbors.Count; i++)
+            {
+                var iNeighbors = GetNeighbors(allNeighbors[i]);
+                var withoutDuplicates = iNeighbors.Where(x => !allNeighbors.Any(y => x == y));
+                allNeighbors.AddRange(withoutDuplicates);
+            }
+
+            var verticesDiffrence = new List<Vertice>(V);
+            verticesDiffrence.Except(allNeighbors);
+            CreateRandomEdge(randomEdge.J, verticesDiffrence);
+        }
+        public void CreateRandomEdge(Vertice from, List<Vertice> candidates)
+        {
+            var randomIndex = new Random().Next(candidates.Count);
+            var newEdge = new Edge(from, candidates[randomIndex]);
+
+            E.Add(newEdge);
+        }
+        public Edge GetRandomEdge()
+        {
+            var randomIndex = new Random().Next(E.Count);
+            return E[randomIndex];
+        }
         public void Draw()
         {
             Console.Write("Waga = {0} ", GetEdgesWeight());

@@ -27,7 +27,12 @@ namespace Graph
                 tree.Generate(v);
                 tree.SetEdgesWeight(wm);
                 tree.Draw();
+                tree.Mutation();
+                tree.SetEdgesWeight(wm);
+                Console.WriteLine("Mutacja");
+                tree.Draw();
             }
+
         }
     }
 }
