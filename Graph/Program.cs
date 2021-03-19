@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Text;
 using GraphModel;
 
 namespace Graph
@@ -20,19 +22,22 @@ namespace Graph
             v.Add(new Vertice("9"));
             v.Add(new Vertice("10"));
             var wm = new WeightMatrix(v);
+
+            using StreamWriter file = new("../../../../tree-log.csv"); // Utworzenie pliku
+            file.WriteLine("Index;Weight;Edges;"); // Dodanie naglowkow
             for (int i = 0; i < 100; i++)
             {
-                Console.Write("Drzewo {0} = {{", i);
                 var tree = new Tree();
                 tree.Generate(v);
                 tree.SetEdgesWeight(wm);
-                tree.Draw();
-                tree.Mutation();
-                tree.SetEdgesWeight(wm);
-                Console.WriteLine("Mutacja");
-                tree.Draw();
-            }
 
+                var sb = new StringBuilder();
+                sb.Append($"{i};");
+                sb.Append(tree);
+                Console.WriteLine(sb);
+
+                file.WriteLine(sb); // Dodanie drzewa do pliku
+            }
         }
     }
 }

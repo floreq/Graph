@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 
 namespace GraphModel
 {
@@ -111,6 +112,16 @@ namespace GraphModel
                 Console.Write("{0},", edge);
             }
             Console.WriteLine();
+        }
+        public override string ToString()
+        {
+            var result = new StringBuilder();
+            result.Append($"{GetEdgesWeight()};");
+            foreach (var edge in E)
+            {
+                result.Append($"{edge};");
+            }
+            return result.ToString();
         }
     }
 }

@@ -14,7 +14,7 @@
 
         public override string ToString()
         {
-            return $"{{{I},{J}}}";
+            return $"{I},{J}";
         }
     }
 }
