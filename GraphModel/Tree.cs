@@ -7,31 +7,53 @@ namespace GraphModel
 {
     public class Tree : IGraph
     {
-        public List<Vertice> V { get; set; } = new List<Vertice>();
-        public List<Edge> E { get; set; } = new List<Edge>();
+        public List<Vertice> V { get; set; }
+        public List<Edge> E { get; set; }
 
+        public Tree()
+        {
+            V = new List<Vertice>();
+            E = new List<Edge>();
+        }
+        public Tree(List<Edge> e)
+        {
+            V = new List<Vertice>();
+            E = new List<Edge>(e);
+
+            for (int i = 0; i < e.Count; i++)
+            {
+                if (!V.Any(x => x.Name == e[i].I.Name)) V.Add(e[i].I);
+                if (!V.Any(x => x.Name == e[i].J.Name)) V.Add(e[i].J);
+            }
+        }
         public void Generate(in List<Vertice> v)
         {
             Random random = new Random();
 
-            var unallocatedV = v.Select(item => (Vertice)item.Clone()).ToList(); // Usuniecie referencji, przekopiowanie wierzcholkow
+            // Usuniecie referencji, przekopiowanie wierzcholkow
+            var unallocatedV = v.Select(item => (Vertice)item.Clone()).ToList();
 
             var index = random.Next(0, unallocatedV.Count);
-            var newVertice = unallocatedV[index]; // Wylosowanie pierwszego wierzcholka drzewa
+            // Wylosowanie pierwszego wierzcholka drzewa
+            var newVertice = unallocatedV[index];
 
-            V.Add(newVertice); // Dodanie wierzcholka do drzewa
-            unallocatedV.RemoveAt(index); // Usuniecie wytypowanego wierzcholka z listy
+            // Dodanie wierzcholka do drzewa
+            V.Add(newVertice);
+            // Usuniecie wytypowanego wierzcholka z listy
+            unallocatedV.RemoveAt(index);
 
             for (int i = 1; i < v.Count; i++)
             {
-                var allocatedVertice = V[random.Next(0, V.Count)]; // Wylosowanie wierzcholka z drzewa do utworzenia krawedzi
+                // Wylosowanie wierzcholka z drzewa do utworzenia krawedzi
+                var allocatedVertice = V[random.Next(0, V.Count)];
 
                 index = random.Next(0, unallocatedV.Count);
                 newVertice = unallocatedV[index];
 
                 V.Add(newVertice);
                 unallocatedV.RemoveAt(index);
-                E.Add(new Edge(allocatedVertice, newVertice)); // Utworzenie krawedzi w drzewie
+                // Utworzenie krawedzi w drzewie
+                E.Add(new Edge(allocatedVertice, newVertice));
             }
         }
         public void SetEdgesWeight(WeightMatrix w)
@@ -55,48 +77,59 @@ namespace GraphModel
             var neighbors = new HashSet<Vertice>();
             foreach (var e in E)
             {
-                if (e.I == v) neighbors.Add(e.J);
-                else if (e.J == v) neighbors.Add(e.I);
+                if (e.I.Name == v.Name) neighbors.Add(e.J);
+                else if (e.J.Name == v.Name) neighbors.Add(e.I);
             }
             return neighbors;
         }
         public void Mutation()
         {
+            // Wylosowanie krawedzi do usuniecia
             var randomEdge = GetRandomEdge();
             E.Remove(randomEdge);
 
+            // Znalezienie sasiadow  wierzcholkow usnietej krawedzi
             var neighborsVerticeI = GetNeighbors(randomEdge.I);
             var neighborsVerticeJ = GetNeighbors(randomEdge.J);
 
+            // Sprawdzenie czy wierzcholek krawedzi jest lisciem
             if (neighborsVerticeI.Count() == 0)
             {
-                CreateRandomEdge(randomEdge.I, V);
+                // Usuniecie liscia z puli wierzcholkow
+                var v = V.Where(x => x.Name != randomEdge.I.Name).ToList();
+                // Utworzenie krawedzi
+                CreateRandomEdge(randomEdge.I, v);
                 return;
             }
             else if (neighborsVerticeJ.Count() == 0)
             {
-                CreateRandomEdge(randomEdge.J, V);
+                var v = V.Where(x => x.Name != randomEdge.J.Name).ToList();
+                CreateRandomEdge(randomEdge.J, v);
                 return;
             }
 
             var allNeighbors = new List<Vertice>(neighborsVerticeJ);
+            allNeighbors.Add(randomEdge.J);
 
+            // Znalezienie wszystkich wierzcholkow nalezacych do zbioru zawierajacego wierzcholek randomEdge.J
             for (int i = 0; i < allNeighbors.Count; i++)
             {
+                // Znalezienie sasiadow wierzcholka
                 var iNeighbors = GetNeighbors(allNeighbors[i]);
-                var withoutDuplicates = iNeighbors.Where(x => !allNeighbors.Any(y => x == y));
+                // Usuniecie wierzcholkow, ktore juz zostaly zapisane do zbioru allNeighbors
+                var withoutDuplicates = iNeighbors.Where(x => !allNeighbors.Any(y => x.Name == y.Name));
                 allNeighbors.AddRange(withoutDuplicates);
             }
 
-            var verticesDiffrence = new List<Vertice>(V);
-            verticesDiffrence.Except(allNeighbors);
+            // Od zbioru wszystkich wieszcholkow wykonanie roznicy ze zbioru allNeighbors
+            List<Vertice> verticesDiffrence = V.Where(x => !allNeighbors.Contains(x)).ToList();
+            // Utworzenie nowej krawedzi
             CreateRandomEdge(randomEdge.J, verticesDiffrence);
         }
         public void CreateRandomEdge(Vertice from, List<Vertice> candidates)
         {
             var randomIndex = new Random().Next(candidates.Count);
             var newEdge = new Edge(from, candidates[randomIndex]);
-
             E.Add(newEdge);
         }
         public Edge GetRandomEdge()
