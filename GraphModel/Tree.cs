@@ -92,7 +92,7 @@ namespace GraphModel
             var neighborsVerticeI = GetNeighbors(randomEdge.I);
             var neighborsVerticeJ = GetNeighbors(randomEdge.J);
 
-            // Sprawdzenie czy wierzcholek krawedzi jest lisciem
+            // Sprawdzenie czy wierzcholek krawedzi konczy sie lisciem
             if (neighborsVerticeI.Count() == 0)
             {
                 // Usuniecie liscia z puli wierzcholkow
