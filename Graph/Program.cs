@@ -76,16 +76,37 @@ namespace Graph
                 }
             }
 
-            // Utworzenie pliku
-            using (StreamWriter file = new("../../../../tree-mutations-log.csv"))
+            // Utworzenie pliku dla zwyklej mutacji
+            //using (StreamWriter file = new("../../../../tree-mutations-log.csv"))
+            //{
+            //    file.WriteLine("Index;Weight;Edges;"); // Dodanie naglowkow
+            //    for (int i = 0; i < 100; i++)
+            //    {
+            //        trees[i].Mutation();
+            //        trees[i].SetEdgesWeight(wm);
+            //        var sb = new StringBuilder();
+            //        sb.Append($"{i};");
+            //        sb.Append(trees[i]);
+
+            //        file.WriteLine(sb); // Dodanie drzewa do pliku
+            //    }
+            //}
+
+            //Utworzenie pliku dla mutacji z local search
+            using (StreamWriter file = new("../../../../tree-mutations-local-search-log.csv"))
             {
-                file.WriteLine("Index;Weight;Edges;"); // Dodanie naglowkow
+                file.WriteLine("Index;Number of Local Search Tries;Orginal Weight;Weight;Edges;"); // Dodanie naglowkow
                 for (int i = 0; i < 100; i++)
                 {
-                    trees[i].Mutation();
                     trees[i].SetEdgesWeight(wm);
+                    var orginalEdgesWeight = trees[i].GetEdgesWeight();
+
+                    int localSearchTriesCount = trees[i].MutationWithLocalSearch(10, wm);
                     var sb = new StringBuilder();
+
                     sb.Append($"{i};");
+                    sb.Append($"{localSearchTriesCount};");
+                    sb.Append($"{orginalEdgesWeight};");
                     sb.Append(trees[i]);
 
                     file.WriteLine(sb); // Dodanie drzewa do pliku

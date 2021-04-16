@@ -126,6 +126,31 @@ namespace GraphModel
             // Utworzenie nowej krawedzi
             CreateRandomEdge(randomEdge.J, verticesDiffrence);
         }
+        // Parametr maxNumberOfTries odpowiedzialny za ograniczenie maksymalnej ilosc prob mutacji
+        public int MutationWithLocalSearch(int maxNumberOfTries = 10, WeightMatrix w)
+        {
+            // Zapisanie orginalnych krawedzi drzewa
+            var orginalEdges = new List<Edge>(E);
+            // Zapisanie orginalnej wagi calego drzewa
+            var orginalEdgesWeight = GetEdgesWeight();
+            // Ustawienie licznika porob
+            int numberOfTries = 0;
+
+            // Wykonanie serii prob zmniejszenia wagi drzewa
+            for (int i = 0; i < maxNumberOfTries; i++)
+            {
+                // Jezeli udalo sie zmniejszyc wage drzewa to przerwac dzialanie
+                if (orginalEdgesWeight > GetEdgesWeight()) break;
+                // Przypisanie drzewu orginalnych krawedzi
+                E = new List<Edge>(orginalEdges);
+                // Wykonanie mutacji
+                Mutation();
+                // Ustawienie wag dla zmutowanego drzewa
+                SetEdgesWeight(w);
+                numberOfTries++;
+            }
+            return numberOfTries;
+        }
         public void CreateRandomEdge(Vertice from, List<Vertice> candidates)
         {
             var randomIndex = new Random().Next(candidates.Count);
